@@ -1,4 +1,3 @@
-# member_service_deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,20 +14,23 @@ spec:
     spec:
       containers:
       - name: member-service
-        image: member_service:latest
-        imagePullPolicy: IfNotPresent  # Use local image if available
+        image: member-service:latest
+        imagePullPolicy: Never
         ports:
-        - containerPort: 5000
+        - containerPort: 5001
+        env:
+        - name: FLASK_ENV
+          value: "development"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: member-service
 spec:
+  type: NodePort
+  ports:
+  - port: 5001
+    targetPort: 5001
+    nodePort: 30001 # Optional: Ensure a specific port is used for NodePort
   selector:
     app: member-service
-  ports:
-    - protocol: TCP
-      port: 6233
-      targetPort: 5000
-  type: NodePort

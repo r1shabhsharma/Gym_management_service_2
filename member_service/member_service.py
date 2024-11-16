@@ -1,22 +1,15 @@
-# member_service.py
 from flask import Flask, request, jsonify
 from models import db, Member
 
-# Initialize the Flask app
 app = Flask(__name__)
-
-# Configure the database URI
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-
-# Initialize the database with the app
 db.init_app(app)
 
-# Route to display a welcome message
 @app.route('/')
 def home():
-    return "Welcome to the Gym Management System!"
+    return "Welcome to the Gym Member Management System!"
 
-# Route to add a new member
+# To add a new member
 @app.route('/members', methods=['POST'])
 def add_member():
     data = request.get_json()
@@ -28,9 +21,9 @@ def add_member():
     )
     db.session.add(new_member)
     db.session.commit()
-    return jsonify({'message': 'Member added successfully','id':new_member.id}), 201
+    return jsonify({'message': 'Member added successfully','membership_id':new_member.id}), 201
 
-# Route to get all members
+# To get all members
 @app.route('/members', methods=['GET'])
 def get_members():
     members = Member.query.all()
@@ -40,15 +33,14 @@ def get_members():
 def get_member(id):
     # Retrieve the first matching record
     member = Member.query.filter_by(id=id).first()
-
     if member:
-        return jsonify(member.to_dict())  # Convert the member instance to a dictionary for JSON response
+        return jsonify(member.to_dict())
     return jsonify({"message": "Member not found"}), 404
 
 
 # Route to delete a member
 @app.route('/members/<int:id>', methods=['DELETE'])
-def delete_membership(id):
+def delete_member(id):
     member = Member.query.get(id)
     if member:
         db.session.delete(member)
