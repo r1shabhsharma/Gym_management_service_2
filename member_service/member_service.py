@@ -1,6 +1,6 @@
 # member_service.py
 from flask import Flask, request, jsonify
-from models import db, Membership
+from models import db, Member
 
 # Initialize the Flask app
 app = Flask(__name__)
@@ -21,20 +21,40 @@ def home():
 def add_member():
     data = request.get_json()
     new_member = Member(
-        name=data['name'], gender=data['gender'], age=data['age'],
-        mobile=data['mobile'], weight=data['weight'],
-        height=data['height'], join_date=data['join_date'],
-        expiry_date=data['expiry_date']
+        id=data['id'],
+        name=data['name'],
+        mobile=data['mobile'], 
+        membership_Id = data['membership_Id']
     )
     db.session.add(new_member)
     db.session.commit()
-    return jsonify({'message': 'Member added successfully'}), 201
+    return jsonify({'message': 'Member added successfully','id':new_member.id}), 201
 
 # Route to get all members
 @app.route('/members', methods=['GET'])
 def get_members():
     members = Member.query.all()
     return jsonify([member.to_dict() for member in members])
+
+@app.route('/members/<int:id>', methods=['GET'])
+def get_member(id):
+    # Retrieve the first matching record
+    member = Member.query.filter_by(id=id).first()
+
+    if member:
+        return jsonify(member.to_dict())  # Convert the member instance to a dictionary for JSON response
+    return jsonify({"message": "Member not found"}), 404
+
+
+# Route to delete a member
+@app.route('/members/<int:id>', methods=['DELETE'])
+def delete_membership(id):
+    member = Member.query.get(id)
+    if member:
+        db.session.delete(member)
+        db.session.commit()
+        return jsonify({'message': 'Member deleted successfully','membershipId':member.membership_Id})
+    return jsonify({'message': 'Member not found'}), 404
 
 if __name__ == '__main__':
     with app.app_context():
